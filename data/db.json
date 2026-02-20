@@ -1,0 +1,344 @@
+{
+  "materials": [
+    {
+      "name": "1.6 Sheet",
+      "unit": "kg",
+      "costPerUnit": 0,
+      "id": "RM-2506"
+    },
+    {
+      "name": "2 mm sheet",
+      "unit": "kg",
+      "costPerUnit": 0,
+      "id": "RM-4500"
+    },
+    {
+      "name": "3 mm Sheet",
+      "unit": "kg",
+      "costPerUnit": 0,
+      "id": "RM-7934"
+    },
+    {
+      "name": "4 mm sheet",
+      "unit": "kg",
+      "costPerUnit": 0,
+      "id": "RM-9142"
+    },
+    {
+      "name": "5.16 mm coil",
+      "unit": "kg",
+      "costPerUnit": 0,
+      "id": "RM-0556"
+    },
+    {
+      "name": "5.78 mm coil",
+      "unit": "kg",
+      "costPerUnit": 0,
+      "id": "RM-2377"
+    },
+    {
+      "name": "2.5 mm coil",
+      "unit": "kg",
+      "costPerUnit": 0,
+      "id": "RM-3150"
+    },
+    {
+      "name": "2.6 mm coil",
+      "unit": "kg",
+      "costPerUnit": 0,
+      "id": "RM-0811"
+    },
+    {
+      "name": "3 mm coil",
+      "unit": "kg",
+      "costPerUnit": 0,
+      "id": "RM-4677"
+    },
+    {
+      "name": "2.5 SS coil",
+      "unit": "kg",
+      "costPerUnit": 0,
+      "id": "RM-7941"
+    }
+  ],
+  "products": [
+    {
+      "name": "M6 X 39 mm Screw Rod",
+      "type": "SEMI_FINISHED",
+      "sku": "kgs",
+      "id": "P-8537"
+    },
+    {
+      "name": "M6 X 49 mm Screw Rod ( Heading Finished)",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-6774"
+    },
+    {
+      "name": "M6 X 39 Screw Rod ( Thread Rolling)",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-7848"
+    },
+    {
+      "name": "M6 X 49 (Thread rolling )",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-5429"
+    },
+    {
+      "name": " 3mm Diamond Nut (press)",
+      "type": "SEMI_FINISHED",
+      "sku": "kgs",
+      "id": "P-9230"
+    },
+    {
+      "name": "3mm Diamond Nut ( champering)",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-3399"
+    },
+    {
+      "name": "3mm Diamond Nut (Tapping)",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-2323"
+    },
+    {
+      "name": "4 mm Diamond Nut(champering )",
+      "type": "SEMI_FINISHED",
+      "sku": "Kgs",
+      "id": "P-5522"
+    },
+    {
+      "name": "4 mm Diamond Nut ( tapping )",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-0328"
+    },
+    {
+      "name": "M6 x 1.6  x 16 Washer(press)",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-8707"
+    },
+    {
+      "name": "M6 x 1.6 x 20 washer (press)",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-7441"
+    },
+    {
+      "name": "M6 x 2 x 20 Washer (press)",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-6322"
+    },
+    {
+      "name": "2mm Lever (press)",
+      "type": "FINISHED",
+      "sku": "kgs ",
+      "id": "P-6927"
+    },
+    {
+      "name": "M2.5 x 15.2 ms Pin(Heading )",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-9855"
+    },
+    {
+      "name": "M2.6 x 25.7 MS Pin(heading)",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-0633"
+    },
+    {
+      "name": "M3 x 10 MS Pin ( Heading )",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-8347"
+    },
+    {
+      "name": "M2.5 x 15 SS Rivet Pin (Heading )",
+      "type": "FINISHED",
+      "sku": "Kgs",
+      "id": "P-3600"
+    },
+    {
+      "name": "M6 X 46 mm Stud ( Heading )",
+      "type": "SEMI_FINISHED",
+      "sku": "Kgs",
+      "id": "P-2329"
+    },
+    {
+      "name": "M6 x 46 Stud ( Re -Heading - ball )",
+      "type": "SEMI_FINISHED",
+      "sku": "kgs",
+      "id": "P-2280"
+    },
+    {
+      "name": "M6 x 46 Stud (thead Rolling )",
+      "type": "FINISHED",
+      "sku": "Kgs",
+      "id": "P-4518"
+    },
+    {
+      "name": "M6 x 43.5 Stud (heading )",
+      "type": "SEMI_FINISHED",
+      "sku": "kgs",
+      "id": "P-6756"
+    },
+    {
+      "name": "M6 x 43.5 Stud ( Re- heading )",
+      "type": "SEMI_FINISHED",
+      "sku": "kgs",
+      "id": "P-5102"
+    },
+    {
+      "name": "M6 x 43.5 Stud (Thread Rolling )",
+      "type": "FINISHED",
+      "sku": "kgs",
+      "id": "P-8659"
+    },
+    {
+      "name": "M6 x 45.5 Stud (heading )",
+      "type": "SEMI_FINISHED",
+      "sku": "kgs",
+      "id": "P-3059"
+    },
+    {
+      "name": "M6 x 45.5 Stud (Re- heading )",
+      "type": "SEMI_FINISHED",
+      "sku": "kgs",
+      "id": "P-8025"
+    },
+    {
+      "name": "M6 x 45.5 Stud ( thread Rolling )",
+      "type": "FINISHED",
+      "sku": "Kgs",
+      "id": "P-9207"
+    }
+  ],
+  "operators": [
+    {
+      "name": "Chandan",
+      "role": "Operator",
+      "id": "OP-5155"
+    },
+    {
+      "name": "Laddu",
+      "role": "Operator",
+      "id": "OP-4904"
+    }
+  ],
+  "productionLogs": [
+    {
+      "batchId": "BATCH-2026-002",
+      "date": "2026-02-18",
+      "operator": "Chandan",
+      "rmUsed": "1.6 Sheet",
+      "rmQuantity": 500,
+      "componentProduced": "M6 x 1.6  x 16 Washer(press)",
+      "quantityProduced": 250,
+      "semiFinished": false,
+      "finished": true,
+      "status": "COMPLETED",
+      "id": "LOG-1771396726445",
+      "timestamp": "2026-02-18T06:38:46.445Z"
+    },
+    {
+      "batchId": "B-2026-0001",
+      "date": "2026-02-19",
+      "operator": "Chandan",
+      "rmUsed": "1.6 Sheet",
+      "rmQuantity": 560,
+      "componentProduced": "M6 x 1.6 x 20 washer (press)",
+      "quantityProduced": 280,
+      "semiFinished": false,
+      "finished": true,
+      "status": "COMPLETED",
+      "id": "LOG-1771516455979",
+      "timestamp": "2026-02-19T15:54:15.979Z"
+    },
+    {
+      "batchId": "B-2026-0002",
+      "date": "2026-02-19",
+      "operator": "Chandan",
+      "rmUsed": "1.6 Sheet",
+      "rmQuantity": 500,
+      "componentProduced": "M6 x 1.6 x 20 washer (press)",
+      "quantityProduced": 250,
+      "semiFinished": false,
+      "finished": true,
+      "status": "COMPLETED",
+      "id": "LOG-1771517484209",
+      "timestamp": "2026-02-19T16:11:24.209Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "u1",
+      "username": "admin",
+      "password": "password",
+      "name": "System Admin",
+      "role": "ADMIN"
+    },
+    {
+      "id": "u2",
+      "username": "operator",
+      "password": "123",
+      "name": "John Operator",
+      "role": "OPERATOR"
+    },
+    {
+      "username": "rithick",
+      "password": "123",
+      "name": "rithick",
+      "role": "ADMIN",
+      "id": "u-1771393790173"
+    },
+    {
+      "username": "chandan",
+      "password": "123",
+      "name": "chandan",
+      "role": "OPERATOR",
+      "id": "u-1771393847083"
+    },
+    {
+      "username": "laddu",
+      "password": "123",
+      "name": "jugesh",
+      "role": "OPERATOR",
+      "id": "u-1771393868736"
+    },
+    {
+      "name": "Praneet G",
+      "username": "Praneet",
+      "password": "1234",
+      "role": "ADMIN",
+      "id": "u-1771516798164"
+    }
+  ],
+  "dispatchLogs": [
+    {
+      "id": "DIS-1771516545187",
+      "date": "2026-02-19",
+      "productName": "M6 x 1.6 x 20 washer (press)",
+      "quantity": 280,
+      "destination": "Customer",
+      "destinationDetail": "Autotex",
+      "notes": "",
+      "timestamp": "2026-02-19T15:55:45.187Z"
+    },
+    {
+      "id": "DIS-1771517666712",
+      "date": "2026-02-19",
+      "productName": "M6 x 1.6 x 20 washer (press)",
+      "quantity": 250,
+      "destination": "Customer",
+      "destinationDetail": "Autotex",
+      "notes": "",
+      "timestamp": "2026-02-19T16:14:26.712Z"
+    }
+  ]
+}
