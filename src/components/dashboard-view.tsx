@@ -46,7 +46,7 @@ const machineStatus = [
 ];
 
 const StatCard = ({ title, value, subtext, icon: Icon, trend, trendUp, alert }: any) => (
-    <div className={`relative overflow-hidden rounded-lg border bg-white p-6 shadow-sm transition-all hover:shadow-md ${alert ? 'border-red-200 bg-red-50/50' : 'border-slate-200'}`}>
+    <div className={`relative overflow-hidden rounded-lg border bg-white p-6 shadow-sm transition-all hover:shadow-md w-full max-w-sm mx-auto md:max-w-none ${alert ? 'border-red-200 bg-red-50/50' : 'border-slate-200'}`}>
         <div className="flex items-center justify-between">
             <div>
                 <p className="text-sm font-medium text-slate-500">{title}</p>

@@ -263,15 +263,15 @@ export function InventoryManager({ initialStock, initialHistory }: InventoryMana
     return (
         <div className="space-y-8 pt-6 animate-in fade-in slide-in-from-left-4 duration-300">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
+                <div className="text-center md:text-left">
                     <h2 className="text-3xl font-bold tracking-tight text-foreground">Inventory Management</h2>
                     <p className="text-muted-foreground mt-1">Track stock levels and dispatch history.</p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button onClick={() => setIsDispatchOpen(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                <div className="flex flex-wrap justify-center md:justify-end gap-2 w-full md:w-auto">
+                    <Button onClick={() => setIsDispatchOpen(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm w-full md:w-auto justify-center">
                         <Truck className="h-4 w-4" /> Dispatch Stock
                     </Button>
-                    <Button onClick={handleExport} variant="outline" className="flex items-center gap-2 border-primary/20 hover:bg-primary/5">
+                    <Button onClick={handleExport} variant="outline" className="flex items-center gap-2 border-primary/20 hover:bg-primary/5 w-full md:w-auto justify-center">
                         <Download className="h-4 w-4" /> Export Report
                     </Button>
                 </div>

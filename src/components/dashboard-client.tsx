@@ -44,7 +44,7 @@ interface DashboardClientProps {
 }
 
 const StatCard = ({ title, value, subtext, icon: Icon, trend, trendUp, alert }: any) => (
-    <div className={`relative overflow-hidden rounded-lg border p-6 shadow-sm transition-all hover:shadow-md ${alert ? 'border-red-200 bg-red-50/50' : 'border-slate-200 bg-white'}`}>
+    <div className={`relative overflow-hidden rounded-lg border p-6 shadow-sm transition-all hover:shadow-md w-full max-w-sm mx-auto md:max-w-none ${alert ? 'border-red-200 bg-red-50/50' : 'border-slate-200 bg-white'}`}>
         <div className="flex items-center justify-between">
             <div>
                 <p className="text-sm font-medium text-slate-500">{title}</p>
@@ -106,20 +106,20 @@ export function DashboardClient({ initialReport }: DashboardClientProps) {
         <div className="space-y-6">
             {/* Top Actions */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
+                <div className="text-center md:text-left">
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
                     <p className="text-slate-500 mt-1">Production overview and daily metrics</p>
                 </div>
-                <div className="flex gap-2">
-                    <Link href="/entry" className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                <div className="flex flex-wrap justify-center md:justify-end gap-2">
+                    <Link href="/entry" className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-sm transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-full md:w-auto justify-center">
                         <PlusCircle className="h-4 w-4" />
                         Log Production
                     </Link>
-                    <button onClick={() => handlePrint && handlePrint()} className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                    <button onClick={() => handlePrint && handlePrint()} className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors flex-1 md:flex-none justify-center">
                         <Printer className="h-4 w-4" />
                         Print
                     </button>
-                    <button onClick={handleExportExcel} className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                    <button onClick={handleExportExcel} className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors flex-1 md:flex-none justify-center">
                         <Download className="h-4 w-4" />
                         Export
                     </button>

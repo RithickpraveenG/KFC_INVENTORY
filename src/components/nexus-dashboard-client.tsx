@@ -26,7 +26,7 @@ const stockStatusData = [
 ];
 
 const StatCard = ({ title, value, subtext, trend, trendUp, icon: Icon, colorClass }: any) => (
-    <Card className="flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+    <Card className="flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow w-full max-w-sm mx-auto md:max-w-none">
         <CardContent className="p-6">
             <div className="flex justify-between items-start mb-4">
                 <div className="space-y-1">
@@ -65,11 +65,11 @@ export function NexusDashboardClient({ initialReport }: { initialReport?: any })
         <div className="space-y-6 pt-2 animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
+                <div className="text-center md:text-left">
                     <h1 className="text-2xl font-bold">Today&apos;s Summary</h1>
-                    <p className="text-slate-500">Here's your manufacturing overview for today</p>
+                    <p className="text-slate-500">Here&apos;s your manufacturing overview for today</p>
                 </div>
-                <div className="text-sm font-medium text-slate-400 bg-white px-4 py-2 rounded-md border border-slate-100 shadow-sm">
+                <div className="text-sm font-medium text-slate-400 bg-white px-4 py-2 rounded-md border border-slate-100 shadow-sm mx-auto md:mx-0">
                     {today}
                 </div>
             </div>
@@ -86,7 +86,7 @@ export function NexusDashboardClient({ initialReport }: { initialReport?: any })
                     colorClass="bg-blue-50 text-blue-600"
                 />
                 <StatCard
-                    title="Today's Production"
+                    title="Today&apos;s Production"
                     value={todaysProduction}
                     subtext="Units produced today"
                     trend="+8% from last week"
