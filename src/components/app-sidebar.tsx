@@ -88,9 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Sidebar collapsible="icon" className="border-r border-sidebar-border" {...props}>
             <SidebarHeader className="h-16 flex items-center px-4 border-b border-sidebar-border">
                 <div className="flex items-center gap-2 w-full group-data-[collapsible=icon]:justify-center">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-red-600 text-sidebar-primary-foreground font-bold text-white">
-                        KCF
-                    </div>
+                    <img src="/logo.jpg" alt="KCF Logo" className="size-8 object-contain rounded-sm" />
                     <div className="flex flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
                         <span className="font-bold text-sm tracking-tight text-slate-900">KOVAI INVENTORY</span>
                         <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Manufacturing System</span>

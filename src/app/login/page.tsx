@@ -76,9 +76,7 @@ export default function LoginPage() {
             <Card className="w-full max-w-md shadow-2xl z-10 border-primary/20 bg-card">
                 <CardHeader className="space-y-1 text-center pb-8 pt-8">
                     <div className="flex justify-center mb-4">
-                        <div className="p-4 bg-primary/10 rounded-full ring-1 ring-primary/20 shadow-[0_0_20px_rgba(34,211,238,0.3)] animate-pulse-slow">
-                            <Layers className="h-8 w-8 text-primary" />
-                        </div>
+                        <img src="/logo.jpg" alt="KCF Logo" className="h-16 w-auto object-contain" />
                     </div>
                     <CardTitle className="text-2xl font-bold tracking-tight text-foreground">KOVAI INVENTORY</CardTitle>
                     <CardDescription className="text-muted-foreground">
