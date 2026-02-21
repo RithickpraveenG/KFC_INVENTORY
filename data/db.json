@@ -273,6 +273,20 @@
       "status": "COMPLETED",
       "id": "LOG-1771517484209",
       "timestamp": "2026-02-19T16:11:24.209Z"
+    },
+    {
+      "batchId": "B-2026-0003",
+      "date": "2026-02-20",
+      "operator": "Chandan",
+      "rmUsed": "3 mm Sheet",
+      "rmQuantity": 500,
+      "componentProduced": " 3mm Diamond Nut (press)",
+      "quantityProduced": 250,
+      "semiFinished": true,
+      "finished": false,
+      "status": "COMPLETED",
+      "id": "LOG-1771555335509",
+      "timestamp": "2026-02-20T02:42:15.509Z"
     }
   ],
   "users": [

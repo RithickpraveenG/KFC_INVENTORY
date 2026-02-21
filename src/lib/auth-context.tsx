@@ -100,7 +100,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logout = () => {
         setUser(null);
         localStorage.removeItem("auth_session");
-        router.push("/login"); // Redirect to login
     };
 
     const addUser = async (userData: Omit<User, "id">) => {
@@ -160,9 +159,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (user.role === 'ADMIN') router.push("/");
             else router.push("/entry");
         } else if (user && user.role === 'OPERATOR') {
-            // Restrict Operator to /entry only
-            if (!pathname.startsWith("/entry")) {
-                router.push("/entry");
+            // Allow Operator to access Dashboard, Inventory, and Production Log
+            const allowedPaths = ["/", "/inventory", "/entry"];
+            const isAllowed = allowedPaths.some(path =>
+                path === "/" ? pathname === "/" : pathname.startsWith(path)
+            );
+
+            if (!isAllowed) {
+                // If they try to access admin pages (e.g., /settings, /admin), redirect to home
+                router.push("/");
             }
         }
     }, [user, isLoading, pathname, router]);

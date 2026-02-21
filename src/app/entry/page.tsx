@@ -51,8 +51,9 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog";
-import { Layers, Package, Save, CheckCircle2, Clock, CheckSquare, Circle, ArrowRight, Check, Truck, AlertTriangle } from "lucide-react";
+import { Layers, Package, Save, CheckCircle2, Clock, CheckSquare, Circle, ArrowRight, Check, Truck, AlertTriangle, Plus, FileText, Calendar, Filter } from "lucide-react";
 
 // --- Types & Schema ---
 const rawMaterialSchema = z.object({
@@ -95,14 +96,21 @@ interface ProductStock {
 
 export default function EntryPage() {
     const { materials, products, operators } = useMasterData();
-    const [activeTab, setActiveTab] = useState("new-batch");
-    const [selectedBatch, setSelectedBatch] = useState<PendingBatch | null>(null);
+    const [view, setView] = useState<'list' | 'dispatch'>('list'); // 'list' allows toggling between history/pending
+    const [activeTab, setActiveTab] = useState("pending");
+
+    // Data State
     const [pendingBatches, setPendingBatches] = useState<PendingBatch[]>([
         { id: "B-2024-001", date: "2024-10-25", operator: "John Doe", materialName: "Steel Sheet", quantity: 120.5, status: 'PENDING' },
     ]);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [nextBatchId, setNextBatchId] = useState("");
+    const [productionLogs, setProductionLogs] = useState<any[]>([]);
     const [stockData, setStockData] = useState<ProductStock[]>([]);
+
+    // UI State
+    const [isCompletionDialogOpen, setIsCompletionDialogOpen] = useState(false);
+    const [isNewBatchDialogOpen, setIsNewBatchDialogOpen] = useState(false);
+    const [selectedBatch, setSelectedBatch] = useState<PendingBatch | null>(null);
+    const [nextBatchId, setNextBatchId] = useState("");
 
     // --- Forms ---
     const rmForm = useForm<z.infer<typeof rawMaterialSchema>>({
@@ -124,36 +132,25 @@ export default function EntryPage() {
         },
     });
 
-    const dispatchForm = useForm<z.infer<typeof dispatchSchema>>({
-        resolver: zodResolver(dispatchSchema) as any,
-        defaultValues: {
-            date: new Date().toISOString().split("T")[0],
-            productName: "",
-            quantity: 0,
-            destination: "Customer",
-            destinationDetail: "",
-            notes: "",
-        },
-    });
-
-    // Fetch Stock Data
-    const fetchStock = async () => {
+    // Fetch Stock & Logs
+    const fetchData = async () => {
         try {
-            const res = await fetch('/api/inventory');
-            if (res.ok) {
-                const data = await res.json();
-                setStockData(data);
-            }
+            const [stockRes, prodRes] = await Promise.all([
+                fetch('/api/inventory'),
+                fetch('/api/production')
+            ]);
+            if (stockRes.ok) setStockData(await stockRes.json());
+            if (prodRes.ok) setProductionLogs(await prodRes.json());
         } catch (error) {
-            console.error("Failed to fetch stock", error);
+            console.error("Failed to fetch data", error);
         }
     };
 
     useEffect(() => {
-        fetchStock();
+        fetchData();
     }, []);
 
-    // --- Auto Batch ID Logic ---
+    // --- Batch ID Logic ---
     const generateBatchId = async () => {
         try {
             const res = await fetch('/api/batch-id');
@@ -163,8 +160,6 @@ export default function EntryPage() {
                 rmForm.setValue("batchId", data.id);
             }
         } catch (error) {
-            console.error("Failed to fetch batch ID", error);
-            // Fallback for offline/error
             const fallbackId = `B-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
             setNextBatchId(fallbackId);
             rmForm.setValue("batchId", fallbackId);
@@ -172,8 +167,8 @@ export default function EntryPage() {
     };
 
     useEffect(() => {
-        generateBatchId();
-    }, []);
+        if (isNewBatchDialogOpen) generateBatchId();
+    }, [isNewBatchDialogOpen]);
 
     // --- Handlers ---
     async function onStartBatch(values: z.infer<typeof rawMaterialSchema>) {
@@ -185,10 +180,10 @@ export default function EntryPage() {
             quantity: values.quantity,
             status: 'PENDING'
         };
-        setPendingBatches([...pendingBatches, newBatch]);
+        setPendingBatches(prev => [...prev, newBatch]);
 
         toast.success("Batch Started", {
-            description: `Batch ${newBatch.id} initialized with ${values.quantity}kg of ${values.materialName}.`,
+            description: `Batch ${newBatch.id} initialized.`,
             icon: <Layers className="h-4 w-4 text-blue-600" />,
         });
 
@@ -199,20 +194,19 @@ export default function EntryPage() {
             materialName: "",
             quantity: 0,
         });
-        generateBatchId(); // Generate new ID for next batch
+        setIsNewBatchDialogOpen(false);
     }
 
     const openCompletionDialog = (batch: PendingBatch) => {
         setSelectedBatch(batch);
         prodForm.setValue("productName", "");
         prodForm.setValue("unitsProduced", 0);
-        setIsDialogOpen(true);
+        setIsCompletionDialogOpen(true);
     };
 
     async function onCompleteBatch(values: z.infer<typeof productionSchema>) {
         if (!selectedBatch) return;
 
-        // ... (productionLog construction) ...
         const selectedProductInfo = products.find(p => p.name === values.productName);
         const isSemiFinished = selectedProductInfo?.type === 'SEMI_FINISHED';
         const isFinished = !selectedProductInfo?.type || selectedProductInfo?.type === 'FINISHED';
@@ -239,415 +233,313 @@ export default function EntryPage() {
 
             if (!response.ok) throw new Error('Failed to save batch');
 
-            setPendingBatches(pendingBatches.filter(b => b.id !== selectedBatch.id));
+            setPendingBatches(prev => prev.filter(b => b.id !== selectedBatch.id));
             toast.success("Batch Completed", {
                 description: `Production recorded for Batch ${selectedBatch.id}.`,
                 icon: <CheckCircle2 className="h-4 w-4 text-emerald-600" />,
             });
-            setIsDialogOpen(false);
+            setIsCompletionDialogOpen(false);
             prodForm.reset();
             setSelectedBatch(null);
-            fetchStock(); // Update stock after production
+            fetchData();
         } catch (error) {
-            console.error(error);
             toast.error("Failed to save batch");
         }
     }
 
-    async function onDispatchSubmit(values: z.infer<typeof dispatchSchema>) {
-        try {
-            const res = await fetch('/api/inventory', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(values)
-            });
-
-            if (res.ok) {
-                toast.success("Dispatch Recorded", {
-                    description: `${values.quantity} units of ${values.productName} sent to ${values.destination}.`,
-                    icon: <Truck className="h-4 w-4 text-blue-600" />,
-                });
-                dispatchForm.reset({
-                    date: new Date().toISOString().split("T")[0],
-                    productName: "",
-                    quantity: 0,
-                    destination: "Customer",
-                    destinationDetail: "",
-                    notes: "",
-                });
-                fetchStock(); // Update stock
-            } else {
-                const err = await res.json();
-                toast.error("Dispatch Failed", { description: err.error });
-            }
-        } catch (error) {
-            toast.error("Network Error");
-        }
-    }
-
-    const selectedProductForDispatch = dispatchForm.watch("productName");
-    const currentStock = stockData.find(s => s.name === selectedProductForDispatch)?.currentStock || 0;
+    // --- Summary Calculations ---
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todaysLogs = productionLogs.filter(l => l.date === todayStr);
+    const totalWeekly = productionLogs.length; // Placeholder logic
 
     return (
-        <div className="space-y-8">
-            {/* Page Header */}
-            <div className="flex flex-col space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">Production Entry</h1>
-                <p className="text-muted-foreground">Manage daily production batches, material logs, and inventory dispatch.</p>
-            </div>
-
-            <div className="w-full max-w-5xl mx-auto">
-                <Tabs value={activeTab} onValueChange={(val) => { setActiveTab(val); if (val === 'dispatch') fetchStock(); }} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted p-1 rounded-xl">
-                        <TabsTrigger value="new-batch" className="rounded-lg py-3">
-                            <Layers className="h-4 w-4 mr-2" /> Start New Batch
-                        </TabsTrigger>
-                        <TabsTrigger value="pending" className="rounded-lg py-3">
-                            <Clock className="h-4 w-4 mr-2" /> Pending Batches
-                            {pendingBatches.length > 0 && (
-                                <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] bg-amber-500/20 text-amber-500">
-                                    {pendingBatches.length}
-                                </Badge>
-                            )}
-                        </TabsTrigger>
-                        <TabsTrigger value="dispatch" className="rounded-lg py-3">
-                            <Truck className="h-4 w-4 mr-2" /> Dispatch & Inventory
-                        </TabsTrigger>
-                    </TabsList>
-
-                    {/* ... (New Batch Tab Content) ... */}
-                    <TabsContent value="new-batch">
-                        {/* Existing New Batch Content - kept same but wrapped to ensure structure */}
-                        <Card className="border-primary/20 shadow-lg shadow-primary/5 inset-0 overflow-hidden bg-card">
-                            <div className="h-2 bg-primary w-full"></div>
-                            <CardHeader className="bg-card border-b border-border">
-                                <CardTitle className="text-primary">Raw Material Input</CardTitle>
-                                <CardDescription>Select material and quantity to initialize a batch.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-6 md:p-8">
-                                <Form {...rmForm}>
-                                    <form onSubmit={rmForm.handleSubmit(onStartBatch)} className="space-y-8">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                                            {/* Column 1: Meta Data */}
-                                            <div className="space-y-6">
-                                                <FormField
-                                                    control={rmForm.control}
-                                                    name="batchId"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Batch ID</FormLabel>
-                                                            <FormControl><Input {...field} readOnly disabled className="bg-muted font-mono" /></FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={rmForm.control}
-                                                    name="date"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Date</FormLabel>
-                                                            <FormControl><Input type="date" {...field} /></FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={rmForm.control}
-                                                    name="operator"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Operator</FormLabel>
-                                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                                <FormControl><SelectTrigger><SelectValue placeholder="Select operator" /></SelectTrigger></FormControl>
-                                                                <SelectContent>
-                                                                    {operators.map((op) => (
-                                                                        <SelectItem key={op.id} value={op.name}>{op.name}</SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-
-                                            {/* Column 2: Material & Quantity */}
-                                            <div className="space-y-6">
-                                                <FormField
-                                                    control={rmForm.control}
-                                                    name="materialName"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Raw Material</FormLabel>
-                                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                                <FormControl>
-                                                                    <SelectTrigger>
-                                                                        <SelectValue placeholder="Select raw material" />
-                                                                    </SelectTrigger>
-                                                                </FormControl>
-                                                                <SelectContent className="max-h-[300px]">
-                                                                    {materials.map((item) => (
-                                                                        <SelectItem key={item.id} value={item.name}>
-                                                                            {item.name}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-
-                                                <FormField
-                                                    control={rmForm.control}
-                                                    name="quantity"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Quantity Used (kg)</FormLabel>
-                                                            <FormControl>
-                                                                <Input
-                                                                    type="number"
-                                                                    step="0.01"
-                                                                    placeholder="0.00"
-                                                                    {...field}
-                                                                    value={field.value === 0 ? '' : field.value}
-                                                                    onChange={(e) => field.onChange(e.target.value)}
-                                                                />
-                                                            </FormControl>
-                                                            <FormDescription>Enter the amount of material consumed.</FormDescription>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-                                        </div>
-                                        <Button type="submit" className="w-full md:w-auto bg-primary text-primary-foreground py-6 px-10 rounded-xl">Start Batch</Button>
-                                    </form>
-                                </Form>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    {/* ... (Pending Batches Tab Content) ... */}
-                    <TabsContent value="pending">
-                        {/* ... Existing Pending Batches Table ... */}
-                        <Card className="border-0 shadow-lg bg-card overflow-hidden relative">
-                            <div className="absolute top-0 left-0 right-0 h-3 bg-orange-500"></div>
-                            <CardHeader className="pt-8 border-b border-border">
-                                <CardTitle className="text-orange-500 text-xl font-bold">Pending Batches</CardTitle>
-                                <CardDescription>Batches in progress.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className="hover:bg-transparent border-b border-orange-500/20">
-                                            <TableHead className="text-orange-500 font-bold">Batch ID</TableHead>
-                                            <TableHead className="text-orange-500 font-bold">Date</TableHead>
-                                            <TableHead className="text-orange-500 font-bold">Given RM</TableHead>
-                                            <TableHead className="text-orange-500 font-bold">Quantity</TableHead>
-                                            <TableHead className="text-right text-orange-500 font-bold pr-6">Action</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {pendingBatches.map((batch) => (
-                                            <TableRow key={batch.id}>
-                                                <TableCell className="font-semibold">{batch.id}</TableCell>
-                                                <TableCell>{batch.date}</TableCell>
-                                                <TableCell>{batch.materialName}</TableCell>
-                                                <TableCell>{batch.quantity}</TableCell>
-                                                <TableCell className="text-right">
-                                                    <Button size="sm" onClick={() => openCompletionDialog(batch)} variant="outline" className="border-2 border-teal-500 text-teal-500 hover:bg-teal-500 hover:text-white">Complete</Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    {/* --- DISPATCH TAB --- */}
-                    <TabsContent value="dispatch" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            {/* Dispatch Form */}
-                            <Card className="lg:col-span-2 border-blue-500/20 shadow-lg shadow-blue-500/5 overflow-hidden">
-                                <div className="h-2 bg-blue-500 w-full"></div>
-                                <CardHeader>
-                                    <CardTitle className="text-blue-600 flex items-center gap-2"><Truck className="h-5 w-5" /> Dispatch Inventory</CardTitle>
-                                    <CardDescription>Log items sent to customers or external plating.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <Form {...dispatchForm}>
-                                        <form onSubmit={dispatchForm.handleSubmit(onDispatchSubmit)} className="space-y-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <FormField
-                                                    control={dispatchForm.control}
-                                                    name="date"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Date</FormLabel>
-                                                            <FormControl><Input type="date" {...field} /></FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={dispatchForm.control}
-                                                    name="destination"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Destination Type</FormLabel>
-                                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                                                                <SelectContent>
-                                                                    <SelectItem value="Customer">Customer</SelectItem>
-                                                                    <SelectItem value="Plating">Plating Vendor</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-
-                                            <FormField
-                                                control={dispatchForm.control}
-                                                name="productName"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Product to Dispatch</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl><SelectTrigger><SelectValue placeholder="Select Product" /></SelectTrigger></FormControl>
-                                                            <SelectContent>
-                                                                {products.filter(p => !p.type || p.type === 'FINISHED').map((p) => (
-                                                                    <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                        {field.value && (
-                                                            <div className={`text-sm mt-1 font-medium ${currentStock > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                                                                Available Stock: {currentStock} units
-                                                            </div>
-                                                        )}
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <FormField
-                                                    control={dispatchForm.control}
-                                                    name="quantity"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Quantity</FormLabel>
-                                                            <FormControl><Input type="number" {...field} /></FormControl>
-                                                            <FormDescription>Must not exceed available stock.</FormDescription>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={dispatchForm.control}
-                                                    name="destinationDetail"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Destination Name (Optional)</FormLabel>
-                                                            <FormControl><Input placeholder="e.g. ABC Corp" {...field} /></FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-
-                                            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg font-semibold">
-                                                Confirm Dispatch
-                                            </Button>
-                                        </form>
-                                    </Form>
-                                </CardContent>
-                            </Card>
-
-                            {/* Stock Overview Sidebar */}
-                            <Card className="h-fit">
-                                <CardHeader>
-                                    <CardTitle>Current Stock</CardTitle>
-                                    <CardDescription>Real-time inventory levels.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4 max-h-[500px] overflow-y-auto">
-                                    {stockData.filter(s => s.currentStock > 0).map((stock) => (
-                                        <div key={stock.name} className="flex justify-between items-center border-b pb-2 last:border-0 hover:bg-muted/50 p-2 rounded">
-                                            <div>
-                                                <p className="font-medium text-sm">{stock.name}</p>
-                                                <p className="text-xs text-muted-foreground">Produced: {stock.totalProduced} | Sent: {stock.totalDispatched}</p>
-                                            </div>
-                                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                                                {stock.currentStock}
-                                            </Badge>
-                                        </div>
-                                    ))}
-                                    {stockData.filter(s => s.currentStock > 0).length === 0 && (
-                                        <div className="text-center text-muted-foreground py-8">
-                                            No stock available.
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </TabsContent>
-
-                </Tabs>
-
-                {/* ... (Dialog for Completion) ... */}
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogContent>
+        <div className="space-y-6 pt-2 animate-in fade-in duration-300">
+            {/* Page Header with Action Button */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Production Log</h1>
+                    <p className="text-muted-foreground">Manage and track production batches.</p>
+                </div>
+                <Dialog open={isNewBatchDialogOpen} onOpenChange={setIsNewBatchDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20">
+                            <Plus className="h-4 w-4 mr-2" /> Log Production
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
                         <DialogHeader>
-                            <DialogTitle>Complete Batch: {selectedBatch?.id}</DialogTitle>
+                            <DialogTitle>Start New Production Batch</DialogTitle>
                         </DialogHeader>
-                        <Form {...prodForm}>
-                            <form onSubmit={prodForm.handleSubmit(onCompleteBatch)} className="space-y-4">
-                                <FormField
-                                    control={prodForm.control}
-                                    name="unitsProduced"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Units Produced</FormLabel>
-                                            <FormControl><Input type="number" {...field} /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={prodForm.control}
-                                    name="productName"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Product</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select finished product" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent className="max-h-[300px]">
-                                                    {products.map((p) => (
-                                                        <SelectItem key={p.id} value={p.name}>
-                                                            {p.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <Button type="submit" className="w-full">Finalize</Button>
+                        <Form {...rmForm}>
+                            <form onSubmit={rmForm.handleSubmit(onStartBatch)} className="space-y-6 pt-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField
+                                        control={rmForm.control}
+                                        name="batchId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Batch ID</FormLabel>
+                                                <FormControl><Input {...field} readOnly disabled className="bg-muted font-mono" /></FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={rmForm.control}
+                                        name="date"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Date</FormLabel>
+                                                <FormControl><Input type="date" {...field} /></FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={rmForm.control}
+                                        name="operator"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Operator</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl><SelectTrigger><SelectValue placeholder="Select operator" /></SelectTrigger></FormControl>
+                                                    <SelectContent>
+                                                        {operators.map((op) => (
+                                                            <SelectItem key={op.id} value={op.name}>{op.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={rmForm.control}
+                                        name="materialName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Raw Material</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl><SelectTrigger><SelectValue placeholder="Select raw material" /></SelectTrigger></FormControl>
+                                                    <SelectContent className="max-h-[200px]">
+                                                        {materials.map((item) => (
+                                                            <SelectItem key={item.id} value={item.name}>{item.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={rmForm.control}
+                                        name="quantity"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Quantity Used (kg)</FormLabel>
+                                                <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <Button type="submit" className="w-full">Initialize Batch</Button>
                             </form>
                         </Form>
                     </DialogContent>
                 </Dialog>
             </div>
+
+            {/* Summary Cards */}
+            <div className="grid gap-4 md:grid-cols-3">
+                <Card className="bg-card border-border/60 shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Today's Production</CardTitle>
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{todaysLogs.length} Batches</div>
+                        <p className="text-xs text-muted-foreground">+2 from yesterday</p>
+                    </CardContent>
+                </Card>
+                <Card className="bg-card border-border/60 shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Logs</CardTitle>
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{productionLogs.length}</div>
+                        <p className="text-xs text-muted-foreground">All time records</p>
+                    </CardContent>
+                </Card>
+                <Card className="bg-card border-border/60 shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Weekly Output</CardTitle>
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{totalWeekly}</div>
+                        <p className="text-xs text-muted-foreground">Batches this week</p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Main Content Area */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <div className="flex items-center justify-between mb-4">
+                    <TabsList className="grid w-[400px] grid-cols-2">
+                        <TabsTrigger value="pending" className="relative">
+                            Pending Batches
+                            {pendingBatches.length > 0 && (
+                                <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-orange-100 text-[10px] font-bold text-orange-600">
+                                    {pendingBatches.length}
+                                </span>
+                            )}
+                        </TabsTrigger>
+                        <TabsTrigger value="history">History Log</TabsTrigger>
+                    </TabsList>
+                    {/* Add Filter Button or Date Picker here if needed */}
+                </div>
+
+                <TabsContent value="pending" className="space-y-4">
+                    <Card className="border-orange-200 bg-orange-50/30">
+                        <CardHeader>
+                            <CardTitle className="text-orange-700 flex items-center gap-2">
+                                <Clock className="h-5 w-5" /> In Progress
+                            </CardTitle>
+                            <CardDescription>Batches currently on the floor. Click 'Complete' to finalize.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="border-orange-200">
+                                        <TableHead className="text-orange-700">Batch ID</TableHead>
+                                        <TableHead className="text-orange-700">Operator</TableHead>
+                                        <TableHead className="text-orange-700">Material</TableHead>
+                                        <TableHead className="text-orange-700">Start Time</TableHead>
+                                        <TableHead className="text-right text-orange-700">Action</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {pendingBatches.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                                                No pending batches. Start a new one above.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                    {pendingBatches.map((batch) => (
+                                        <TableRow key={batch.id} className="border-orange-100 hover:bg-orange-50">
+                                            <TableCell className="font-mono font-medium">{batch.id}</TableCell>
+                                            <TableCell>{batch.operator}</TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium">{batch.materialName}</span>
+                                                    <span className="text-xs text-muted-foreground">{batch.quantity} kg</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{batch.date}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button size="sm" onClick={() => openCompletionDialog(batch)} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                                                    <Check className="h-4 w-4 mr-1" /> Complete
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="history">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Production History</CardTitle>
+                            <CardDescription>Comprehensive log of all completed batches.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="bg-muted/30">
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Batch ID</TableHead>
+                                        <TableHead>Product</TableHead>
+                                        <TableHead>Operator</TableHead>
+                                        <TableHead className="text-right">Quantity</TableHead>
+                                        <TableHead className="text-center">Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {productionLogs.map((log) => (
+                                        <TableRow key={log.id || log.batchId} className="hover:bg-muted/50">
+                                            <TableCell className="text-muted-foreground">{log.date}</TableCell>
+                                            <TableCell className="font-mono text-xs">{log.batchId}</TableCell>
+                                            <TableCell className="font-medium text-foreground">{log.componentProduced}</TableCell>
+                                            <TableCell>{log.operator}</TableCell>
+                                            <TableCell className="text-right font-bold">{log.quantityProduced}</TableCell>
+                                            <TableCell className="text-center">
+                                                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">Completed</Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {productionLogs.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                                                No history records found.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+
+            {/* Completion Dialog */}
+            <Dialog open={isCompletionDialogOpen} onOpenChange={setIsCompletionDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Complete Batch: {selectedBatch?.id}</DialogTitle>
+                    </DialogHeader>
+                    <Form {...prodForm}>
+                        <form onSubmit={prodForm.handleSubmit(onCompleteBatch)} className="space-y-4">
+                            <FormField
+                                control={prodForm.control}
+                                name="unitsProduced"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Units Produced</FormLabel>
+                                        <FormControl><Input type="number" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={prodForm.control}
+                                name="productName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Product</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select finished product" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent className="max-h-[200px]">
+                                                {products.map((p) => (
+                                                    <SelectItem key={p.id} value={p.name}>
+                                                        {p.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">Finalize Batch</Button>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
