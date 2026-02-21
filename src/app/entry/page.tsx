@@ -61,12 +61,12 @@ const rawMaterialSchema = z.object({
     operator: z.string().min(2, "Operator name is required"),
     batchId: z.string().min(3, "Batch ID is required"),
     materialName: z.string().min(1, "Select a material"),
-    quantity: z.coerce.number().gt(0, "Quantity must be greater than 0"),
+    quantity: z.preprocess((val) => Number(val), z.number().gt(0, "Quantity must be greater than 0")),
 });
 
 const productionSchema = z.object({
     productName: z.string().min(1, "Select a product"),
-    unitsProduced: z.coerce.number().int().min(1, "Units must be at least 1"),
+    unitsProduced: z.preprocess((val) => Number(val), z.number().int().min(1, "Units must be at least 1")),
 });
 
 const dispatchSchema = z.object({
@@ -349,7 +349,7 @@ export default function EntryPage() {
             <div className="grid gap-4 md:grid-cols-3">
                 <Card className="bg-card border-border/60 shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Today's Production</CardTitle>
+                        <CardTitle className="text-sm font-medium">Today&apos;s Production</CardTitle>
                         <Clock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -402,7 +402,7 @@ export default function EntryPage() {
                             <CardTitle className="text-orange-700 flex items-center gap-2">
                                 <Clock className="h-5 w-5" /> In Progress
                             </CardTitle>
-                            <CardDescription>Batches currently on the floor. Click 'Complete' to finalize.</CardDescription>
+                            <CardDescription>Batches currently on the floor. Click &apos;Complete&apos; to finalize.</CardDescription>
                         </CardHeader>
                         <CardContent className="p-0">
                             <Table>

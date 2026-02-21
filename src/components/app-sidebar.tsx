@@ -19,7 +19,6 @@ import {
     SidebarHeader,
     SidebarRail,
     SidebarGroup,
-    SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
@@ -28,13 +27,19 @@ import {
     SidebarMenuSubButton,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 
+import { ProjectTitle } from "@/components/project-title"
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const { user, logout } = useAuth();
+
+    const searchString = searchParams.toString();
+    const fullCurrentPath = searchString ? `${pathname}?${searchString}` : pathname;
 
     // Define navigation items dynamically or filter them
     const navMain = [
@@ -90,7 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="flex items-center gap-2 w-full group-data-[collapsible=icon]:justify-center">
                     <img src="/logo.jpg" alt="KCF Logo" className="size-8 object-contain rounded-sm" />
                     <div className="flex flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
-                        <span className="font-bold text-sm tracking-tight text-slate-900">KOVAI INVENTORY</span>
+                        <ProjectTitle />
                         <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Manufacturing System</span>
                     </div>
                 </div>
@@ -116,7 +121,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                             <SidebarMenuSub>
                                                 {item.items.map(sub => (
                                                     <SidebarMenuSubItem key={sub.title}>
-                                                        <SidebarMenuSubButton asChild isActive={pathname === sub.url || (sub.url.includes("?tab=") && pathname + window.location.search === sub.url)}>
+                                                        <SidebarMenuSubButton asChild isActive={pathname === sub.url || (sub.url.includes("?tab=") && fullCurrentPath === sub.url)}>
                                                             <Link href={sub.url}>
                                                                 <span>{sub.title}</span>
                                                             </Link>

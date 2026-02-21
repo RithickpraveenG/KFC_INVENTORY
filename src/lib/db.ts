@@ -1,17 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 import { encrypt } from './crypto';
+import { User, Material, Product, Operator, ProductionLog } from './types';
 
 // Define the path to the JSON file
 const DB_PATH = path.join(process.cwd(), 'data', 'db.json');
 
 // Interface for the Database Structure
 export interface Database {
-    materials: any[];
-    products: any[];
-    operators: any[];
-    productionLogs: any[];
-    users: any[];
+    materials: Material[];
+    products: Product[];
+    operators: Operator[];
+    productionLogs: ProductionLog[];
+    users: User[];
 }
 
 // Ensure the data directory and file exist

@@ -32,6 +32,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
+import { ProjectTitle } from "@/components/project-title";
 
 const loginSchema = z.object({
     username: z.string().min(1, "Username is required"),
@@ -78,7 +79,9 @@ export default function LoginPage() {
                     <div className="flex justify-center mb-4">
                         <img src="/logo.jpg" alt="KCF Logo" className="h-16 w-auto object-contain" />
                     </div>
-                    <CardTitle className="text-2xl font-bold tracking-tight text-foreground">KOVAI INVENTORY</CardTitle>
+                    <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
+                        <ProjectTitle />
+                    </CardTitle>
                     <CardDescription className="text-muted-foreground">
                         Production Management System
                     </CardDescription>

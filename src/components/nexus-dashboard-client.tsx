@@ -66,7 +66,7 @@ export function NexusDashboardClient({ initialReport }: { initialReport?: any })
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Welcome back, Admin User</h1>
+                    <h1 className="text-2xl font-bold">Today&apos;s Summary</h1>
                     <p className="text-slate-500">Here's your manufacturing overview for today</p>
                 </div>
                 <div className="text-sm font-medium text-slate-400 bg-white px-4 py-2 rounded-md border border-slate-100 shadow-sm">

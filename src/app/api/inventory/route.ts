@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { DispatchRecord, ProductStock } from '@/types/inventory';
 import { ProductionRecord } from '@/types';
+import { Product } from '@/lib/types';
 
 const dataFilePath = path.join(process.cwd(), 'data', 'db.json');
 
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
         const data = getData();
         const productionLogs: ProductionRecord[] = data.productionLogs || [];
         const dispatchLogs: DispatchRecord[] = data.dispatchLogs || [];
-        const products: any[] = data.products || []; // Read products to get minStock
+        const products: Product[] = data.products || []; // Read products to get minStock
 
         // 1. Calculate Total Produced
         const producedMap: Record<string, number> = {};
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
 
         // 3. Combine into Stock Report
         // Iterate over ALL defined products from Master Data
-        const stockReport: ProductStock[] = products.map((product: any) => {
+        const stockReport: ProductStock[] = products.map((product: Product) => {
             const name = product.name;
             const totalProduced = producedMap[name] || 0;
             const totalDispatched = dispatchedMap[name] || 0;
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
 
         // Also include items found in logs but NOT in products (legacy checks)
         Object.keys(producedMap).forEach(name => {
-            if (!products.find((p: any) => p.name === name)) {
+            if (!products.find((p: Product) => p.name === name)) {
                 const totalProduced = producedMap[name] || 0;
                 const totalDispatched = dispatchedMap[name] || 0;
                 stockReport.push({
@@ -168,7 +169,7 @@ export async function DELETE(request: NextRequest) {
         }
 
         const initialLength = data.dispatchLogs.length;
-        data.dispatchLogs = data.dispatchLogs.filter((log: any) => log.id !== id);
+        data.dispatchLogs = data.dispatchLogs.filter((log: DispatchRecord) => log.id !== id);
 
         if (data.dispatchLogs.length === initialLength) {
             return NextResponse.json({ error: 'Record not found' }, { status: 404 });

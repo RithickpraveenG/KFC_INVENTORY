@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, writeDb } from '@/lib/db';
+import { Material } from '@/lib/types';
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-    const id = params.id;
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const body = await request.json();
     const db = readDb();
 
-    const index = db.materials.findIndex((m: any) => m.id === id);
+    const index = db.materials.findIndex((m: Material) => m.id === id);
     if (index === -1) {
         return NextResponse.json({ error: 'Material not found' }, { status: 404 });
     }
@@ -18,12 +19,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json(db.materials[index]);
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-    const id = params.id;
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const db = readDb();
 
     const initialLength = db.materials.length;
-    db.materials = db.materials.filter((m: any) => m.id !== id);
+    db.materials = db.materials.filter((m: Material) => m.id !== id);
 
     if (db.materials.length === initialLength) {
         return NextResponse.json({ error: 'Material not found' }, { status: 404 });

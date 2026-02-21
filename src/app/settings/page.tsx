@@ -13,7 +13,10 @@ import { useMasterData, Material, Product, Operator } from "@/lib/master-data-co
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
+import { isValidProjectName, DEFAULT_PROJECT_NAME } from "@/lib/project-config";
+import { Settings } from "lucide-react";
 
 function SettingsContent() {
     const searchParams = useSearchParams();
@@ -46,6 +49,15 @@ function SettingsContent() {
     const [isEditOperatorOpen, setIsEditOperatorOpen] = useState(false);
 
     const [newUser, setNewUser] = useState({ username: "", password: "", name: "", role: "OPERATOR" as const });
+
+    const [projectName, setProjectName] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem("projectName") || DEFAULT_PROJECT_NAME;
+        }
+        return DEFAULT_PROJECT_NAME;
+    });
+    const [projectNameInput, setProjectNameInput] = useState(projectName);
+    const [projectError, setProjectError] = useState("");
 
     // -- Handlers --
     const handleAddMaterial = () => {
@@ -141,6 +153,21 @@ function SettingsContent() {
         setIsUserOpen(false);
     };
 
+    const handleSaveProjectName = () => {
+        if (!isValidProjectName(projectNameInput)) {
+            setProjectError("Invalid project name. Use lowercase, numbers, '.', '_', '-' only (max 30 chars).");
+            return;
+        }
+        setProjectError("");
+        setProjectName(projectNameInput);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem("projectName", projectNameInput);
+            // Proactively notify of change (in a real app we'd use a context/store)
+            window.dispatchEvent(new Event("storage"));
+        }
+        toast.success("Project name updated successfully!");
+    };
+
     return (
         <div className="p-8 max-w-6xl mx-auto space-y-8">
             <div className="flex flex-col gap-2">
@@ -149,12 +176,46 @@ function SettingsContent() {
             </div>
 
             <Tabs value={currentTab} onValueChange={(val) => router.push(`/settings?tab=${val}`)} className="w-full">
-                <TabsList className={`grid w-full max-w-[500px] ${user?.role === 'ADMIN' ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                <TabsList className={`grid w-full max-w-[600px] ${user?.role === 'ADMIN' ? 'grid-cols-5' : 'grid-cols-4'}`}>
+                    <TabsTrigger value="general">General</TabsTrigger>
                     <TabsTrigger value="materials">Materials</TabsTrigger>
                     <TabsTrigger value="products">Products</TabsTrigger>
                     <TabsTrigger value="operators">Operators</TabsTrigger>
                     {user?.role === 'ADMIN' && <TabsTrigger value="users">Users</TabsTrigger>}
                 </TabsList>
+
+                {/* --- GENERAL TAB --- */}
+                <TabsContent value="general" className="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Settings className="h-5 w-5" /> General Settings
+                            </CardTitle>
+                            <CardDescription>Manage your application branding and global preferences.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="projectName">Project Name</Label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        id="projectName"
+                                        value={projectNameInput}
+                                        onChange={(e) => setProjectNameInput(e.target.value)}
+                                        placeholder="e.g. kovai-inventory"
+                                        className={projectError ? "border-destructive" : ""}
+                                    />
+                                    <Button onClick={handleSaveProjectName} disabled={projectNameInput === projectName}>
+                                        <Save className="mr-2 h-4 w-4" /> Save
+                                    </Button>
+                                </div>
+                                {projectError && <p className="text-xs text-destructive">{projectError}</p>}
+                                <p className="text-xs text-muted-foreground">
+                                    Rules: Lowercase, numbers, dots, underscores, and hyphens only. Max 30 chars.
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
                 {/* --- MATERIALS TAB --- */}
                 <TabsContent value="materials" className="space-y-4">

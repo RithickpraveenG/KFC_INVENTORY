@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, writeDb } from '@/lib/db';
+import { Operator } from '@/lib/types';
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-    const id = params.id;
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const body = await request.json();
     const db = readDb();
 
-    const index = db.operators.findIndex((op: any) => op.id === id);
+    const index = db.operators.findIndex((o: Operator) => o.id === id);
     if (index === -1) {
         return NextResponse.json({ error: 'Operator not found' }, { status: 404 });
     }
@@ -18,12 +19,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json(db.operators[index]);
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-    const id = params.id;
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const db = readDb();
 
     const initialLength = db.operators.length;
-    db.operators = db.operators.filter((op: any) => op.id !== id);
+    db.operators = db.operators.filter((o: Operator) => o.id !== id);
 
     if (db.operators.length === initialLength) {
         return NextResponse.json({ error: 'Operator not found' }, { status: 404 });

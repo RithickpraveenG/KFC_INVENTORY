@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, writeDb } from '@/lib/db';
+import { User } from '@/lib/types';
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-    const id = params.id;
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const body = await request.json();
     const db = readDb();
 
@@ -21,8 +22,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-    const id = params.id;
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const db = readDb();
 
     if (!db.users) return NextResponse.json({ error: 'No users found' }, { status: 404 });
@@ -34,7 +35,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     // Prevent deleting the last admin
     if (db.users[index].role === 'ADMIN') {
-        const adminCount = db.users.filter((u: any) => u.role === 'ADMIN').length;
+        const adminCount = db.users.filter((u: User) => u.role === 'ADMIN').length;
         if (adminCount <= 1) {
             return NextResponse.json({ error: 'Cannot delete the only Admin user.' }, { status: 400 });
         }

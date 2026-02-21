@@ -34,6 +34,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
 
+    // Shared public routes
+    const publicRoutes = React.useMemo(() => ["/login"], []);
+
     // Load users and session
     useEffect(() => {
         const load = async () => {
@@ -149,7 +152,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (isLoading) return;
 
-        const publicRoutes = ["/login"];
         const isPublic = publicRoutes.includes(pathname);
 
         if (!user && !isPublic) {
@@ -180,7 +182,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Don't render children if we are about to redirect
-    const publicRoutes = ["/login"];
     const isPublic = publicRoutes.includes(pathname);
     if (!user && !isPublic) return null; // Wait for redirect to /login
 

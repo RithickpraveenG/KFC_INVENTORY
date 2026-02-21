@@ -38,7 +38,7 @@ import Link from "next/link";
 const dispatchSchema = z.object({
     date: z.string().min(1, "Date is required"),
     productName: z.string().min(1, "Select a product"),
-    quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
+    quantity: z.preprocess((val) => Number(val), z.number().min(1, "Quantity must be at least 1")),
     destination: z.enum(["Plating", "Customer"]),
     destinationDetail: z.string().optional(),
     notes: z.string().optional(),
@@ -50,12 +50,12 @@ export default function DispatchPage() {
     const [loading, setLoading] = useState(false);
 
     const form = useForm<z.infer<typeof dispatchSchema>>({
-        resolver: zodResolver(dispatchSchema),
+        resolver: zodResolver(dispatchSchema) as any,
         defaultValues: {
             date: new Date().toISOString().split("T")[0],
             productName: "",
             quantity: 0,
-            destination: "Customer",
+            destination: "Customer" as const,
             destinationDetail: "",
             notes: "",
         },

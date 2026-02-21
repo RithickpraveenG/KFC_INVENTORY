@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readDb } from '@/lib/db';
+import { ProductionLog } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,10 +12,10 @@ export async function GET() {
         const prefix = `B-${currentYear}-`;
 
         // Filter logs for current year and exclude non-conforming IDs
-        const yearLogs = logs.filter((log: any) => log.batchId && log.batchId.startsWith(prefix));
+        const yearLogs = logs.filter((log: ProductionLog) => log.batchId && log.batchId.startsWith(prefix));
 
         let maxId = 0;
-        yearLogs.forEach((log: any) => {
+        yearLogs.forEach((log: ProductionLog) => {
             const parts = log.batchId.split('-');
             if (parts.length === 3) {
                 const num = parseInt(parts[2], 10);

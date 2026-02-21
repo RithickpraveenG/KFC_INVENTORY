@@ -17,6 +17,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { ProjectTitle } from "@/components/project-title";
+
 export const metadata: Metadata = {
   title: "Production Monitor",
   description: "Monitor and track production efficiency",
@@ -40,7 +42,7 @@ export default function RootLayout({
                   <div className="flex items-center gap-3">
                     <img src="/logo.jpg" alt="KCF Logo" className="h-10 w-auto object-contain rounded-sm" />
                     <div className="p-2">
-                      <span className="font-bold text-lg tracking-tight text-foreground">KOVAI INVENTORY</span>
+                      <ProjectTitle />
                     </div>
                   </div>
                   <div className="flex items-center">
