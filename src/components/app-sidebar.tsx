@@ -90,7 +90,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     if (!user) return null;
 
     return (
-        <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar shadow-xl md:shadow-none" {...props}>
+        <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-white md:bg-sidebar shadow-2xl md:shadow-none" {...props}>
             <SidebarHeader className="h-16 flex items-center px-4 border-b border-sidebar-border">
                 <div className="flex items-center gap-2 w-full group-data-[collapsible=icon]:justify-center">
                     <img src="/logo.jpg" alt="KCF Logo" className="size-8 object-contain rounded-sm" />

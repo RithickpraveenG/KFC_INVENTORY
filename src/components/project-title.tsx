@@ -21,5 +21,5 @@ export function ProjectTitle() {
         return () => window.removeEventListener("storage", updateTitle);
     }, []);
 
-    return <span className="font-bold text-lg uppercase tracking-tight text-foreground">{title}</span>;
+    return <span className="font-bold text-sm md:text-lg uppercase tracking-tight text-foreground truncate block">{title}</span>;
 }

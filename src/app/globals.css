@@ -99,23 +99,6 @@
   --sidebar-ring: 217.2 91.2% 59.8%;
 }
 
-/* Force White Background on Mobile regardless of theme */
-@media (max-width: 768px) {
-  :root, .dark {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-border: 220 13% 91%;
-    --muted: 210 40% 98%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-  }
-}
-
 .dark {
   /* DARK MODE VARIABLES */
   --background: 240 10% 3.9%;
@@ -203,5 +186,33 @@
   to {
     opacity: var(--tw-exit-opacity, 1);
     transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1)) rotate(var(--tw-exit-rotate, 0));
+  }
+}
+
+/* Force White Background on Mobile regardless of theme - Added at end for maximum priority */
+@media (max-width: 768px) {
+
+  :root,
+  .dark,
+  body,
+  main,
+  [data-sidebar="sidebar"],
+  .bg-background,
+  .bg-sidebar,
+  [data-slot="sidebar"] {
+    --background: 0 0% 100% !important;
+    --foreground: 224 71.4% 4.1% !important;
+    --card: 0 0% 100% !important;
+    --card-foreground: 224 71.4% 4.1% !important;
+    --popover: 0 0% 100% !important;
+    --popover-foreground: 224 71.4% 4.1% !important;
+    --sidebar-background: 0 0% 100% !important;
+    --sidebar-foreground: 240 5.3% 26.1% !important;
+    --sidebar-border: 220 13% 91% !important;
+    --muted: 210 40% 98% !important;
+    --muted-foreground: 215.4 16.3% 46.9% !important;
+    --sidebar: 0 0% 100% !important;
+    background-color: white !important;
+    color: black !important;
   }
 }
