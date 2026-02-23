@@ -99,6 +99,23 @@
   --sidebar-ring: 217.2 91.2% 59.8%;
 }
 
+/* Force White Background on Mobile regardless of theme */
+@media (max-width: 768px) {
+  :root, .dark {
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-border: 220 13% 91%;
+    --muted: 210 40% 98%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+  }
+}
+
 .dark {
   /* DARK MODE VARIABLES */
   --background: 240 10% 3.9%;

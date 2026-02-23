@@ -5,7 +5,6 @@ import {
     Box,
     TrendingUp,
     AlertTriangle,
-    Coins,
     Package,
     ArrowUpRight,
     ArrowDownRight
@@ -59,7 +58,6 @@ export function NexusDashboardClient({ initialReport }: { initialReport?: any })
     const totalItems = initialReport?.inventory?.length || 0;
     const todaysProduction = initialReport?.totalProduced || 0;
     const lowStockCount = initialReport?.inventory?.filter((i: any) => i.currentStock < 50).length || 0;
-    const inventoryValue = "$891.35"; // Placeholder for now as value isn't in simple report
 
     return (
         <div className="space-y-6 pt-2 animate-in fade-in duration-500">
@@ -100,15 +98,6 @@ export function NexusDashboardClient({ initialReport }: { initialReport?: any })
                     subtext="Items below minimum stock"
                     icon={AlertTriangle}
                     colorClass="bg-orange-50 text-orange-600"
-                />
-                <StatCard
-                    title="Inventory Value"
-                    value={inventoryValue}
-                    subtext="Total stock value"
-                    trend="+5% from last week"
-                    trendUp={true}
-                    icon={Coins}
-                    colorClass="bg-indigo-50 text-indigo-600"
                 />
             </div>
 

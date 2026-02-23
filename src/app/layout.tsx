@@ -38,7 +38,7 @@ export default function RootLayout({
           <AuthProvider>
             <SidebarProvider>
               <main className="w-full bg-background min-h-screen transition-colors duration-300 ease-in-out">
-                <div className="p-4 h-16 flex items-center justify-between border-b border-border bg-white dark:bg-zinc-950 sticky top-0 z-40 shadow-sm relative">
+                <div className="p-4 h-16 flex items-center justify-between border-b border-border bg-white dark:bg-zinc-950 md:dark:bg-zinc-950 sticky top-0 z-40 shadow-sm relative">
                   <div className="flex items-center gap-3 overflow-hidden">
                     <img src="/logo.jpg" alt="KCF Logo" className="h-9 w-auto object-contain rounded-sm shrink-0" />
                     <div className="hidden md:block truncate">
